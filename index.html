@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AloneWolf Tools - Ultimate Free Online Utilities & Games</title>
+    <!-- Include fflate library for high-performance client-side ZIP extraction -->
+    <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
+    <style>
+        :root {
+            --bg-color: #07090e;
+            --card-bg: #0f172a;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #10b981;
+            --border-color: #1e293b;
+            --insta-gradient: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            --yt-color: #ef4444;
+            --movie-color: #f59e0b;
+            --ai-color: #ec4899;
+            --zip-color: #3b82f6;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 1-Second Loading Splash Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.4s ease;
+        }
+        .loader-logo {
+            font-size: 28px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 15px;
+            letter-spacing: -0.5px;
+        }
+        .loader-logo span { color: var(--primary); }
+        .loader-bar {
+            width: 160px;
+            height: 3px;
+            background: var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+        .loader-bar::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; height: 100%; width: 100%;
+            background: var(--primary);
+            animation: loadAnim 1s linear forwards;
+        }
+        @keyframes loadAnim {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(0%); }
+        }
+
+        /* Left Sidebar */
+        sidebar {
+            width: 270px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 1000;
+        }
+
+        .sidebar-brand {
+            padding: 24px 20px;
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .sidebar-brand span { color: var(--primary); }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 16px 12px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .nav-links::-webkit-scrollbar { width: 4px; }
+        .nav-links::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        
+        .nav-category {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            padding: 10px 10px 4px 10px;
+            font-weight: 700;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            padding: 9px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: left;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        .nav-btn:hover { background: rgba(99, 102, 241, 0.08); color: var(--text-main); }
+        .nav-btn.active {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 270px;
+            flex: 1;
+            padding: 40px;
+            max-width: 900px;
+        }
+
+        header { text-align: left; margin-bottom: 30px; }
+        header h1 { font-size: 26px; font-weight: 700; color: #fff; margin-bottom: 6px; letter-spacing: -0.5px; }
+        header p { color: var(--text-muted); font-size: 13px; }
+
+        .tool-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tool-section.active { display: block; }
+        .tool-section h2 { margin-top: 0; font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+        .tool-section .desc { font-size: 12px; color: var(--text-muted); margin-bottom: 22px; }
+
+        label { font-size: 12px; font-weight: 500; color: var(--text-muted); display: block; margin-bottom: 6px; }
+
+        input[type="file"], input[type="number"], input[type="text"], select, textarea {
+            width: 100%;
+            padding: 11px 14px;
+            margin-bottom: 16px;
+            background: #07090e;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            border-radius: 8px;
+            outline: none;
+            font-size: 13px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        textarea { resize: vertical; min-height: 90px; }
+
+        .action-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        }
+        .action-btn:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+        
+        .insta-action-btn { background: var(--insta-gradient); box-shadow: 0 4px 12px rgba(220, 39, 67, 0.25); }
+        .yt-action-btn { background-color: var(--yt-color); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25); }
+        .yt-action-btn:hover { background-color: #dc2626; }
+        .movie-action-btn { background-color: var(--movie-color); color: #07090e; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25); font-weight: 700; }
+        .movie-action-btn:hover { background-color: #d97706; color: #fff; }
+        .ai-action-btn { background: linear-gradient(135deg, #ec4899, #8b5cf6); box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3); }
+        .zip-action-btn { background-color: var(--zip-color); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25); }
+
+        .result-area {
+            margin-top: 18px;
+            padding: 16px;
+            background: #07090e;
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .download-btn {
+            display: inline-block;
+            margin-top: 10px;
+            background-color: var(--accent);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 12px;
+            transition: opacity 0.2s;
+        }
+        .download-btn:hover { opacity: 0.9; }
+        
+        /* AI Loading Spinner */
+        .ai-loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(236, 72, 153, 0.2);
+            border-top: 4px solid #ec4899;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .row { display: flex; gap: 12px; }
+        .col { flex: 1; }
+        canvas { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- 1-Second Loading Splash Screen -->
+    <div id="loading-screen">
+        <div class="loader-logo">🐺 Alone<span>Wolf</span></div>
+        <div class="loader-bar"></div>
+    </div>
+
+    <!-- Left Sidebar -->
+    <sidebar>
+        <div class="sidebar-brand">🐺 Alone<span>Wolf Hub</span></div>
+        <div class="nav-links">
+            <div class="nav-category">AI Creators</div>
+            <button class="nav-btn active" onclick="switchTool('aiimagegen', this)">✨ AI Image Generator</button>
+            <button class="nav-btn" onclick="switchTool('aivideogen', this)">🎥 AI Video Generator</button>
+            <button class="nav-btn" onclick="switchTool('thumbnailmaker', this)">🎨 YT Thumbnail Studio</button>
+
+            <div class="nav-category">Media & Social</div>
+            <button class="nav-btn" onclick="switchTool('resizer', this)">🖼️ Image Resizer</button>
+            <button class="nav-btn" onclick="switchTool('compressor', this)">📉 Image Compressor</button>
+            <button class="nav-btn" onclick="switchTool('converter', this)">🔄 Format Converter</button>
+            <button class="nav-btn" onclick="switchTool('zipextractor', this)">📦 ZIP File Extractor</button>
+            <button class="nav-btn" onclick="switchTool('downloader', this)">📥 YT Downloader</button>
+            <button class="nav-btn" onclick="switchTool('downloader-insta', this)">🎬 Insta Reel Downloader</button>
+            <button class="nav-btn" onclick="switchTool('moviedownloader', this)">🍿 Movie Hub Hub</button>
+            
+            <div class="nav-category">Time-Pass Games</div>
+            <button class="nav-btn" onclick="switchTool('dinogame', this)">🦖 Dino Jump Game</button>
+            <button class="nav-btn" onclick="switchTool('cargame', this)">🏎️ Turbo Car Racer</button>
+
+            <div class="nav-category">Utilities & Dev</div>
+            <button class="nav-btn" onclick="switchTool('qrgen', this)">🔲 QR Generator</button>
+            <button class="nav-btn" onclick="switchTool('passgen', this)">🔑 Password Generator</button>
+            <button class="nav-btn" onclick="switchTool('wordcounter', this)">📝 Word Counter</button>
+            <button class="nav-btn" onclick="switchTool('jsonformatter', this)">📋 JSON Formatter</button>
+            <button class="nav-btn" onclick="switchTool('base64tool', this)">🔤 Base64 Codec</button>
+            <button class="nav-btn" onclick="switchTool('urlcodec', this)">🔗 URL Codec</button>
+        </div>
+    </sidebar>
+
+    <!-- Main Workspace -->
+    <div class="main-content">
+        <header>
+            <h1>AloneWolf AI Studio</h1>
+            <p>Advanced high-performance creative suite running directly on your web browser</p>
+        </header>
+
+        <!-- AI Image Generator -->
+        <div id="aiimagegen" class="tool-section active">
+            <h2>✨ AI Image Generator</h2>
+            <div class="desc">Describe your imagination, and our free AI engine will render high-res visuals instantly.</div>
+            <label>Enter Image Prompt:</label>
+            <textarea id="aiImagePrompt" placeholder="A majestic white wolf howling under a cyberpunk neon moon..."></textarea>
+            <button class="action-btn ai-action-btn" onclick="generateAiImage()">Generate AI Image</button>
+            
+            <div class="ai-loading" id="aiImageLoading">
+                <div class="spinner"></div>
+                <p style="color: var(--text-muted); font-size: 12px; margin: 0;">AI is painting your masterpiece... Please wait (5s)</p>
+            </div>
+
+            <div class="result-area" id="aiImageResult">
+                <img id="generatedAiImg" style="max-width: 100%; border-radius: 8px; margin-bottom: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.5);" alt="AI Image">
+                <br>
+                <a id="downloadAiImg" class="download-btn" style="background: linear-gradient(135deg, #ec4899, #8b5cf6);" href="#" download="alonewolf-image.jpg" target="_blank">Download Image</a>
+            </div>
+        </div>
+
+        <!-- AI Video Generator -->
+        <div id="aivideogen" class="tool-section">
+            <h2>🎥 AI Video Generator (Direct On-Site Studio)</h2>
+            <div class="desc">Generate cinematic motion loops and AI animated sequences directly on AloneWolf.</div>
+            <label>Enter Video Prompt / Scene Description:</label>
+            <textarea id="aiVideoPrompt" placeholder="Cinematic flyover through a glowing futuristic cyber city at night..."></textarea>
+            <label>Select Motion Style:</label>
+            <select id="videoStyle">
+                <option value="cinematic">Cinematic Hyper-Realistic</option>
+                <option value="anime">Anime / Japanese 2D Motion</option>
+                <option value="cyberpunk">Cyberpunk Neon Glitch</option>
+                <option value="fantasy">Dark Fantasy Unreal Engine</option>
+            </select>
+            <button class="action-btn ai-action-btn" onclick="generateAiVideoDirect()">Synthesize Video On-Site</button>
+            
+            <div class="ai-loading" id="aiVideoLoading">
+                <div class="spinner"></div>
+                <p style="color: var(--text-muted); font-size: 12px; margin: 0;">Rendering neural video frames directly on AloneWolf serverless node...</p>
+            </div>
+
+            <div class="result-area" id="aiVideoResult">
+                <div style="margin-bottom: 12px;">
+                    <video id="generatedVideoPlayer" controls autoplay loop style="max-width: 100%; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.5);"></video>
+                </div>
+                <a id="downloadAiVideo" class="download-btn" style="background: linear-gradient(135deg, #ec4899, #8b5cf6);" href="#" download="alonewolf-ai-video.mp4">Download Rendered Video (.mp4)</a>
+            </div>
+        </div>
+
+        <!-- Advanced YouTube Thumbnail Studio -->
+        <div id="thumbnailmaker" class="tool-section">
+            <h2>🎨 Advanced YouTube Thumbnail Studio</h2>
+            <div class="desc">Create viral CTR-optimized thumbnails via AI Prompts, YouTube Link Extraction, or Custom Uploads!</div>
+            
+            <label>Thumbnail Creation Mode:</label>
+            <select id="thumbMode" onchange="toggleThumbMode()">
+                <option value="ai">1. AI Prompt Generator</option>
+                <option value="extract">2. Extract from YouTube Link 🔗</option>
+                <option value="custom">3. Custom File Upload & Text</option>
+            </select>
+
+            <!-- Mode 1: AI Prompt -->
+            <div id="thumbAiBox">
+                <label>Enter Thumbnail AI Prompt:</label>
+                <textarea id="thumbPrompt" placeholder="Shocked gamer holding controller with intense neon explosions background..."></textarea>
+                <button class="action-btn ai-action-btn" onclick="generateAiThumbnail()">Generate AI Thumbnail</button>
+            </div>
+
+            <!-- Mode 2: YouTube Link Extractor -->
+            <div id="thumbExtractBox" style="display: none;">
+                <label>Paste YouTube Video Link (To Extract & Edit):</label>
+                <input type="text" id="ytThumbUrlInput" placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+                <button class="action-btn yt-action-btn" onclick="extractYtThumbnail()">Fetch & Edit YouTube Thumbnail</button>
+            </div>
+
+            <!-- Mode 3: Custom Upload -->
+            <div id="thumbCustomBox" style="display: none;">
+                <label>Upload Custom Image Background:</label>
+                <input type="file" id="thumbBgFile" accept="image/*">
+            </div>
+
+            <!-- Common Text Overlay Controls for Custom/Extract modes -->
+            <div id="thumbTextOverlayControls" style="display: none; margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <label>Add Bold Headline Text Over Image:</label>
+                <input type="text" id="thumbText" placeholder="e.g. I WON $10,000 IN GTA V!">
+                <div class="row">
+                    <div class="col">
+                        <label>Text Color:</label>
+                        <select id="thumbTextColor">
+                            <option value="#ffffff">White</option>
+                            <option value="#facc15">Bright Yellow</option>
+                            <option value="#ef4444">Neon Red</option>
+                            <option value="#38bdf8">Sky Blue</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label>Action:</label>
+                        <button class="action-btn" onclick="applyTextOverlayToCanvas()" style="margin-top: 0;">Apply Text Overlay</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ai-loading" id="thumbLoading">
+                <div class="spinner"></div>
+                <p style="color: var(--text-muted); font-size: 12px; margin: 0;">Processing canvas nodes...</p>
+            </div>
+
+            <div class="result-area" id="thumbResult">
+                <canvas id="thumbCanvas" style="max-width: 100%; border-radius: 8px; margin-bottom: 12px; background: #000; display: block; margin-left: auto; margin-right: auto;"></canvas>
+                <a id="downloadThumb" class="download-btn" href="#" download="youtube-thumbnail.jpg">Download HD Thumbnail (1280x720)</a>
+            </div>
+        </div>
+
+        <!-- ZIP File Extractor -->
+        <div id="zipextractor" class="tool-section">
+            <h2>📦 ZIP File Extractor</h2>
+            <div class="desc">Upload any .zip archive to instantly inspect and extract files right inside your browser.</div>
+            <label>Select .zip Archive File:</label>
+            <input type="file" id="zipFileInput" accept=".zip">
+            <button class="action-btn zip-action-btn" onclick="extractZipFile()">Extract Archive Contents</button>
+            
+            <div class="ai-loading" id="zipLoading">
+                <div class="spinner"></div>
+                <p style="color: var(--text-muted); font-size: 12px; margin: 0;">Unpacking files securely in browser memory...</p>
+            </div>
+
+            <div class="result-area" id="zipResult" style="display: none; text-align: left;">
+                <div style="font-weight: 600; font-size: 13px; color: var(--accent); margin-bottom: 10px;" id="zipFileCount">Files extracted successfully:</div>
+                <div id="zipFileList" style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
+            </div>
+        </div>
+
+        <!-- Dino Jump Game -->
+        <div id="dinogame" class="tool-section">
+            <h2>🦖 AloneWolf Dino Jump Game</h2>
+            <div class="desc">Take a quick study/work break! Press Spacebar or Click to jump over obstacles.</div>
+            <div style="text-align: center; background: #07090e; border: 1px solid var(--border-color); border-radius: 12px; padding: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 600; font-size: 13px;">
+                    <span>Score: <span id="dinoScore" style="color: var(--accent);">0</span></span>
+                    <span>High Score: <span id="dinoHighScore" style="color: var(--primary);">0</span></span>
+                </div>
+                <canvas id="dinoCanvas" width="760" height="220" style="background: #0f172a; border-radius: 8px; width: 100%; max-width: 760px; cursor: pointer; display: block; margin: 0 auto;" onclick="jumpDino()"></canvas>
+                <p style="color: var(--text-muted); font-size: 12px; margin-top: 10px;">Press <b>Spacebar</b> or Click on canvas to jump!</p>
+                <button class="action-btn" onclick="startDinoGame()" style="max-width: 200px; margin: 10px auto 0 auto;">Restart Game</button>
+            </div>
+        </div>
+
+        <!-- Turbo Car Racing Game -->
+        <div id="cargame" class="tool-section">
+            <h2>🏎️ AloneWolf Turbo Car Racer</h2>
+            <div class="desc">Steer your racing car using <b>Left / Right Arrow Keys</b> to avoid incoming traffic!</div>
+            <div style="text-align: center; background: #07090e; border: 1px solid var(--border-color); border-radius: 12px; padding: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 600; font-size: 13px;">
+                    <span>Distance: <span id="carScore" style="color: var(--accent);">0</span>m</span>
+                    <span>Top Speed: <span id="carSpeed" style="color: var(--primary);">120</span> KM/H</span>
+                </div>
+                <canvas id="carCanvas" width="450" height="500" style="background: #1e293b; border-radius: 8px; width: 100%; max-width: 450px; display: block; margin: 0 auto; box-shadow: 0 10px 20px rgba(0,0,0,0.5);"></canvas>
+                <div style="display: flex; gap: 10px; justify-content: center; margin-top: 12px;">
+                    <button class="action-btn" onclick="moveCarLeft()" style="max-width: 130px; background: #334155;">◀️ Steer Left</button>
+                    <button class="action-btn" onclick="startCarGame()" style="max-width: 140px;">Restart Race</button>
+                    <button class="action-btn" onclick="moveCarRight()" style="max-width: 130px; background: #334155;">Steer Right ▶️</button>
+                </div>
+                <p style="color: var(--text-muted); font-size: 12px; margin-top: 8px;">Use Keyboard Arrow Keys (<b>← / →</b>) or buttons above to play.</p>
+            </div>
+        </div>
+
+        <!-- Image Resizer -->
+        <div id="resizer" class="tool-section">
+            <h2>🖼️ Image Dimension Resizer</h2>
+            <div class="desc">Quickly adjust image width and height directly in pixels.</div>
+            <label>Select Image File:</label>
+            <input type="file" id="resizeFile" accept="image/*">
+            <div class="row">
+                <div class="col"><label>Width (px):</label><input type="number" id="targetWidth" placeholder="e.g. 800"></div>
+                <div class="col"><label>Height (px):</label><input type="number" id="targetHeight" placeholder="e.g. 600"></div>
+            </div>
+            <button class="action-btn" onclick="resizeImage()">Resize & Download</button>
+            <div class="result-area" id="resizeResult">
+                <span style="color: var(--accent); font-weight: 600; font-size: 12px;">Resized Successfully!</span><br>
+                <a id="downloadResize" class="download-btn" href="#" download="resized.jpg">Download Image</a>
+            </div>
+        </div>
+
+        <!-- Image Compressor -->
+        <div id="compressor" class="tool-section">
+            <h2>📉 Image File Compressor</h2>
+            <div class="desc">Optimize and reduce file size of heavy images instantly.</div>
+            <label>Select Image File:</label>
+            <input type="file" id="compressFile" accept="image/*">
+            <label>Compression Preset:</label>
+            <select id="qualitySelect">
+                <option value="0.8">High Quality (Light Compression)</option>
+                <option value="0.5" selected>Balanced (Recommended)</option>
+                <option value="0.3">Max Compression (Smallest Size)</option>
+            </select>
+            <button class="action-btn" onclick="compressImage()">Compress & Download</button>
+            <div class="result-area" id="compressResult">
+                <span style="color: var(--accent); font-weight: 600; font-size: 12px;">Compressed Successfully!</span><br>
+                <a id="downloadCompress" class="download-btn" href="#" download="compressed.jpg">Download Compressed Image</a>
+            </div>
+        </div>
+
+        <!-- Format Converter -->
+        <div id="converter" class="tool-section">
+            <h2>🔄 Image Format Converter</h2>
+            <div class="desc">Convert image files smoothly between JPG, PNG, and WEBP formats.</div>
+            <label>Select Image File:</label>
+            <input type="file" id="convertFile" accept="image/*">
+            <label>Target Format:</label>
+            <select id="formatSelect">
+                <option value="image/jpeg">JPG (.jpg)</option>
+                <option value="image/png">PNG (.png)</option>
+                <option value="image/webp">WEBP (.webp)</option>
+            </select>
+            <button class="action-btn" onclick="convertImageFormat()">Convert & Download</button>
+            <div class="result-area" id="convertResult">
+                <span style="color: var(--accent); font-weight: 600; font-size: 12px;">Converted Successfully!</span><br>
+                <a id="downloadConvert" class="download-btn" href="#" download="converted.jpg">Download Converted File</a>
+            </div>
+        </div>
+
+        <!-- YouTube Downloader -->
+        <div id="downloader" class="tool-section">
+            <h2>📥 YouTube Video Downloader</h2>
+            <div class="desc">Fast-track direct stream processing portal interface.</div>
+            <label>Paste YouTube Video / Shorts URL:</label>
+            <input type="text" id="ytUrlInput" placeholder="https://www.youtube.com/watch?v=...">
+            <button class="action-btn yt-action-btn" onclick="processYtDownload()">Get Video Stream Window</button>
+            <div class="result-area" id="downloadResult">
+                <span style="color: var(--accent); font-weight: 600; font-size: 13px;">Stream Link Generated!</span><br>
+                <p style="color: var(--text-muted); font-size: 12px; margin: 6px 0;">Click below to open safe download panel:</p>
+                <a id="ytOpenLink" class="download-btn yt-download-btn" href="#" target="_blank">Proceed to Download Video</a>
+            </div>
+        </div>
+
+        <!-- Instagram Reel Downloader -->
+        <div id="downloader-insta" class="tool-section">
+            <h2>🎬 Instagram Reel Downloader</h2>
+            <div class="desc">High-speed media extraction gateway for reels and video posts.</div>
+            <label>Paste Instagram Reel / Post URL:</label>
+            <input type="text" id="instaUrlInput" placeholder="https://www.instagram.com/reel/...">
+            <button class="action-btn insta-action-btn" onclick="processInstaDownload()">Get Reel Stream Window</button>
+            <div class="result-area" id="instaResult">
+                <span style="color: var(--accent); font-weight: 600; font-size: 13px;">Reel Link Generated!</span><br>
+                <p style="color: var(--text-muted); font-size: 12px; margin: 6px 0;">Click below to open safe download panel:</p>
+                <a id="instaOpenLink" class="download-btn insta-download-btn" href="#" target="_blank">Proceed to Download Reel</a>
+            </div>
+        </div>
+
+        <!-- Movie Downloader Hub -->
+        <div id="moviedownloader" class="tool-section">
+            <h2>🍿 HD Movies Hub Downloader</h2>
+            <div class="desc">Search portal directly or navigate to the main movie library hub.</div>
+            <label>Search Movie Name (Optional):</label>
+            <input type="text" id="movieSearchInput" placeholder="e.g. Avengers, Leo, Interstellar (Leave blank for home)">
+            <button class="action-btn movie-action-btn" onclick="processMovieDownload()">Proceed to Movie Portal</button>
+            <div class="result-area" id="movieResult">
+                <span style="color: var(--movie-color); font-weight: 700; font-size: 13px;" id="movieResultText">Portal Redirect Ready!</span><br>
+                <p style="color: var(--text-muted); font-size: 12px; margin: 6px 0;">Click below to open destination page:</p>
+                <a id="movieOpenLink" class="download-btn movie-download-btn" href="https://new5.hdhub4u.cl/?utm=mn1" target="_blank">Open Movie Link</a>
+            </div>
+        </div>
+
+        <!-- QR Code Generator -->
+        <div id="qrgen" class="tool-section">
+            <h2>🔲 Custom QR Code Generator</h2>
+            <div class="desc">Generate clean QR matrices for websites, text strings, or UPI handles.</div>
+            <label>Enter Text or Website URL:</label>
+            <input type="text" id="qrText" placeholder="https://yourwebsite.com">
+            <button class="action-btn" onclick="generateQR()">Generate QR Code</button>
+            <div class="result-area" id="qrResult">
+                <img id="qrImage" style="max-width: 160px; margin-bottom: 10px; border-radius: 6px; background: #fff; padding: 6px;" alt="QR Code">
+                <br>
+                <a id="downloadQr" class="download-btn" href="#" download="qrcode.png">Download QR Code</a>
+            </div>
+        </div>
+
+        <!-- Strong Password Generator -->
+        <div id="passgen" class="tool-section">
+            <h2>🔑 Secure Password Generator</h2>
+            <div class="desc">Create highly-secure cryptographic randomized credentials.</div>
+            <label>Password Length: <span id="lengthVal" style="color: var(--primary); font-weight: 600;">16</span></label>
+            <input type="range" id="passLength" min="8" max="32" value="16" oninput="document.getElementById('lengthVal').innerText = this.value" style="width:100%; margin-bottom: 15px; accent-color: var(--primary);">
+            <div style="display:flex; gap:16px; margin-bottom: 16px; font-size: 12px; color: var(--text-muted);">
+                <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="incSymbols" checked style="width:auto; margin:0;"> Symbols (!@#$)</label>
+                <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="incNumbers" checked style="width:auto; margin:0;"> Numbers (0-9)</label>
+            </div>
+            <button class="action-btn" onclick="generatePassword()">Generate Secure Password</button>
+            <div class="result-area" id="passResult" style="display: block;">
+                <input type="text" id="generatedPassword" readonly style="text-align: center; font-weight: 600; font-size: 15px; color: var(--accent); margin-bottom: 8px;" value="Click generate above">
+                <button class="action-btn" style="background: var(--border-color); padding: 8px; font-size: 12px;" onclick="copyPassword()">Copy to Clipboard</button>
+            </div>
+        </div>
+
+        <!-- Word & Character Counter -->
+        <div id="wordcounter" class="tool-section">
+            <h2>📝 Word & Character Counter</h2>
+            <div class="desc">Real-time telemetry analysis for essays, captions, or notes.</div>
+            <label>Type or Paste Text Below:</label>
+            <textarea id="textInput" placeholder="Start typing or paste your content here..." oninput="countText()"></textarea>
+            <div style="display: flex; gap: 12px; text-align: center;">
+                <div style="flex: 1; background: #07090e; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <div style="font-size: 17px; font-weight: 700; color: var(--primary);" id="wordCount">0</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">Words</div>
+                </div>
+                <div style="flex: 1; background: #07090e; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <div style="font-size: 17px; font-weight: 700; color: var(--accent);" id="charCount">0</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">Characters</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- JSON Formatter & Validator -->
+        <div id="jsonformatter" class="tool-section">
+            <h2>📋 JSON Formatter & Validator</h2>
+            <div class="desc">Prettify, validate, or minify raw JSON strings instantly.</div>
+            <label>Paste Raw JSON Code:</label>
+            <textarea id="jsonInput" placeholder='{"name": "AloneWolf", "status": true}'></textarea>
+            <div class="row" style="margin-bottom: 12px;">
+                <button class="action-btn col" onclick="formatJson()">Format / Prettify</button>
+                <button class="action-btn col" style="background: var(--border-color);" onclick="minifyJson()">Minify</button>
+            </div>
+            <div class="result-area" id="jsonResult" style="display: block;">
+                <textarea id="jsonOutput" readonly placeholder="Formatted output will appear here..."></textarea>
+            </div>
+        </div>
+
+        <!-- Base64 Codec -->
+        <div id="base64tool" class="tool-section">
+            <h2>🔤 Base64 Encoder / Decoder</h2>
+            <div class="desc">Encode text strings to Base64 or decode back securely.</div>
+            <label>Input Text / Encrypted Data:</label>
+            <textarea id="base64Input" placeholder="Enter text here..."></textarea>
+            <div class="row" style="margin-bottom: 12px;">
+                <button class="action-btn col" onclick="encodeBase64()">Encode to Base64</button>
+                <button class="action-btn col" style="background: var(--border-color);" onclick="decodeBase64()">Decode from Base64</button>
+            </div>
+            <div class="result-area" id="base64Result" style="display: block;">
+                <textarea id="base64Output" readonly placeholder="Result will appear here..."></textarea>
+            </div>
+        </div>
+
+        <!-- URL Codec -->
+        <div id="urlcodec" class="tool-section">
+            <h2>🔗 URL Encoder / Decoder</h2>
+            <div class="desc">Safely encode special characters for links or decode query parameters.</div>
+            <label>URL or String:</label>
+            <textarea id="urlInput" placeholder="https://example.com/?q=hello world"></textarea>
+            <div class="row" style="margin-bottom: 12px;">
+                <button class="action-btn col" onclick="encodeUrlData()">Encode URL</button>
+                <button class="action-btn col" style="background: var(--border-color);" onclick="decodeUrlData()">Decode URL</button>
+            </div>
+            <div class="result-area" id="urlResult" style="display: block;">
+                <textarea id="urlOutput" readonly placeholder="Output string..."></textarea>
+            </div>
+        </div>
+
+    </div>
+
+    <canvas id="canvasProcess"></canvas>
+
+    <script>
+        /* 1-Second Loading Splash Screen Handler */
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                let loader = document.getElementById('loading-screen');
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 400);
+            }, 1000);
+        });
+
+        function switchTool(toolId, btnElement) {
+            document.querySelectorAll('.tool-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(toolId).classList.add('active');
+            btnElement.classList.add('active');
+            
+            if(toolId === 'dinogame') {
+                initDinoGame();
+            } else if(toolId === 'cargame') {
+                initCarGame();
+            }
+        }
+
+        /* ZIP File Extractor Engine */
+        function extractZipFile() {
+            let fileInput = document.getElementById('zipFileInput');
+            if (fileInput.files.length === 0) {
+                alert("Please select a .zip file first!");
+                return;
+            }
+
+            let file = fileInput.files[0];
+            document.getElementById('zipLoading').style.display = 'block';
+            document.getElementById('zipResult').style.display = 'none';
+
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let zipData = new Uint8Array(e.target.result);
+                    // Unzip using fflate
+                    let unzipped = fflate.unzipSync(zipData);
+                    
+                    let fileListContainer = document.getElementById('zipFileList');
+                    fileListContainer.innerHTML = "";
+                    let keys = Object.keys(unzipped);
+
+                    document.getElementById('zipFileCount').innerText = `Successfully unpacked ${keys.length} items from archive:`;
+
+                    keys.forEach((filename) => {
+                        let content = unzipped[filename];
+                        // Skip directory entries if any
+                        if (filename.endsWith('/')) return;
+
+                        let itemRow = document.createElement('div');
+                        itemRow.style.display = "flex";
+                        itemRow.style.justify0 = "space-between";
+                        itemRow.style.alignItems = "center";
+                        itemRow.style.background = "#07090e";
+                        itemRow.style.padding = "8px 12px";
+                        itemRow.style.borderRadius = "6px";
+                        itemRow.style.border = "1px solid var(--border-color)";
+
+                        let nameSpan = document.createElement('span');
+                        nameSpan.innerText = filename;
+                        nameSpan.style.fontSize = "12px";
+                        nameSpan.style.color = "#f8fafc";
+                        nameSpan.style.wordBreak = "break-all";
+                        nameSpan.style.flex = "1";
+                        nameSpan.style.marginRight = "10px";
+
+                        let downloadLink = document.createElement('a');
+                        downloadLink.innerText = "Download File";
+                        downloadLink.className = "download-btn";
+                        downloadLink.style.marginTop = "0";
+                        downloadLink.style.padding = "5px 12px";
+                        downloadLink.style.fontSize = "11px";
+
+                        // Create blob to download individual extracted file
+                        let blob = new Blob([content]);
+                        let blobUrl = URL.createObjectURL(blob);
+                        downloadLink.href = blobUrl;
+                        
+                        // Extract just the base filename for download
+                        let pureName = filename.split('/').pop();
+                        downloadLink.download = pureName;
+
+                        itemRow.appendChild(nameSpan);
+                        itemRow.appendChild(downloadLink);
+                        fileListContainer.appendChild(itemRow);
+                    });
+
+                    document.getElementById('zipLoading').style.display = 'none';
+                    document.getElementById('zipResult').style.display = 'block';
+
+                } catch (err) {
+                    document.getElementById('zipLoading').style.display = 'none';
+                    alert("Failed to parse ZIP archive. Make sure it's a valid .zip file.");
+                    console.error(err);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        /* Dino Jump Game Engine */
+        let dinoCanvas, dinoCtx;
+        let dino = { x: 50, y: 150, width: 28, height: 32, vy: 0, gravity: 0.6, jumpPower: -10, grounded: true };
+        let obstacles = [];
+        let dinoScore = 0;
+        let dinoHighScore = 0;
+        let dinoGameRunning = false;
+        let gameInterval = null;
+
+        function initDinoGame() {
+            dinoCanvas = document.getElementById('dinoCanvas');
+            dinoCtx = dinoCanvas.getContext('2d');
+            startDinoGame();
+        }
+
+        function startDinoGame() {
+            dino.y = 150;
+            dino.vy = 0;
+            dino.grounded = true;
+            obstacles = [];
+            dinoScore = 0;
+            dinoGameRunning = true;
+            document.getElementById('dinoScore').innerText = dinoScore;
+            
+            if(gameInterval) clearInterval(gameInterval);
+            gameInterval = setInterval(updateDinoGame, 1000 / 60);
+        }
+
+        function jumpDino() {
+            if (!dinoGameRunning) {
+                startDinoGame();
+                return;
+            }
+            if (dino.grounded) {
+                dino.vy = dino.jumpPower;
+                dino.grounded = false;
+            }
+        }
+
+        window.addEventListener('keydown', function(e) {
+            if(e.code === 'Space' && document.getElementById('dinogame').classList.contains('active')) {
+                e.preventDefault();
+                jumpDino();
+            }
+        });
+
+        function updateDinoGame() {
+            if (!dinoGameRunning) return;
+
+            dino.vy += dino.gravity;
+            dino.y += dino.vy;
+
+            if (dino.y >= 150) {
+                dino.y = 150;
+                dino.vy = 0;
+                dino.grounded = true;
+            }
+
+            if (Math.random() < 0.02 && (obstacles.length === 0 || obstacles[obstacles.length - 1].x < 500)) {
+                obstacles.push({ x: 760, y: 156, width: 20, height: 26 });
+            }
+
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].x -= 5;
+
+                if (
+                    dino.x < obstacles[i].x + obstacles[i].width &&
+                    dino.x + dino.width > obstacles[i].x &&
+                    dino.y < obstacles[i].y + obstacles[i].height &&
+                    dino.y + dino.height > obstacles[i].y
+                ) {
+                    dinoGameRunning = false;
+                    if (dinoScore > dinoHighScore) {
+                        dinoHighScore = dinoScore;
+                        document.getElementById('dinoHighScore').innerText = dinoHighScore;
+                    }
+                }
+
+                if (obstacles[i].x + obstacles[i].width < 0) {
+                    obstacles.splice(i, 1);
+                    dinoScore += 10;
+                    document.getElementById('dinoScore').innerText = dinoScore;
+                }
+            }
+
+            drawDinoGame();
+        }
+
+        function drawDinoGame() {
+            dinoCtx.fillStyle = '#0f172a';
+            dinoCtx.fillRect(0, 0, dinoCanvas.width, dinoCanvas.height);
+
+            dinoCtx.strokeStyle = '#334155';
+            dinoCtx.lineWidth = 2;
+            dinoCtx.beginPath();
+            dinoCtx.moveTo(0, 182);
+            dinoCtx.lineTo(760, 182);
+            dinoCtx.stroke();
+
+            dinoCtx.fillStyle = '#6366f1';
+            dinoCtx.fillRect(dino.x, dino.y, dino.width, dino.height);
+            dinoCtx.fillStyle = '#fff';
+            dinoCtx.fillRect(dino.x + 18, dino.y + 6, 4, 4);
+
+            dinoCtx.fillStyle = '#10b981';
+            for (let obs of obstacles) {
+                dinoCtx.fillRect(obs.x, obs.y, obs.width, obs.height);
+            }
+
+            if (!dinoGameRunning) {
+                dinoCtx.fillStyle = 'rgba(7, 9, 14, 0.85)';
+                dinoCtx.fillRect(0, 0, dinoCanvas.width, dinoCanvas.height);
+                dinoCtx.fillStyle = '#f8fafc';
+                dinoCtx.font = 'bold 20px Inter, sans-serif';
+                dinoCtx.textAlign = 'center';
+                dinoCtx.fillText('GAME OVER', dinoCanvas.width / 2, 95);
+                dinoCtx.font = '13px Inter, sans-serif';
+                dinoCtx.fillStyle = '#94a3b8';
+                dinoCtx.fillText('Click Restart or Press Space to Play Again', dinoCanvas.width / 2, 125);
+            }
+        }
+
+        /* Turbo Car Racing Game Engine */
+        let carCanvas, carCtx;
+        let playerCar = { x: 200, y: 380, width: 38, height: 70, speed: 5 };
+        let trafficCars = [];
+        let roadLines = [];
+        let carScore = 0;
+        let carGameRunning = false;
+        let carInterval = null;
+        let roadOffset = 0;
+
+        function initCarGame() {
+            carCanvas = document.getElementById('carCanvas');
+            carCtx = carCanvas.getContext('2d');
+            for(let i=0; i<5; i++) {
+                roadLines.push({y: i * 120});
+            }
+            startCarGame();
+        }
+
+        function startCarGame() {
+            playerCar.x = 200;
+            trafficCars = [];
+            carScore = 0;
+            carGameRunning = true;
+            document.getElementById('carScore').innerText = carScore;
+
+            if(carInterval) clearInterval(carInterval);
+            carInterval = setInterval(updateCarGame, 1000 / 60);
+        }
+
+        function moveCarLeft() {
+            if (carGameRunning && playerCar.x > 75) {
+                playerCar.x -= 45;
+            }
+        }
+
+        function moveCarRight() {
+            if (carGameRunning && playerCar.x < 335) {
+                playerCar.x += 45;
+            }
+        }
+
+        window.addEventListener('keydown', function(e) {
+            if(document.getElementById('cargame').classList.contains('active')) {
+                if(e.code === 'ArrowLeft') {
+                    e.preventDefault();
+                    moveCarLeft();
+                } else if(e.code === 'ArrowRight') {
+                    e.preventDefault();
+                    moveCarRight();
+                }
+            }
+        });
+
+        function updateCarGame() {
+            if (!carGameRunning) return;
+
+            carScore += 1;
+            document.getElementById('carScore').innerText = carScore;
+
+            roadOffset += 7;
+            if(roadOffset >= 120) roadOffset = 0;
+
+            if (Math.random() < 0.03 && (trafficCars.length === 0 || trafficCars[trafficCars.length - 1].y > 160)) {
+                let lanes = [75, 165, 255, 335];
+                let randomLane = lanes[Math.floor(Math.random() * lanes.length)];
+                trafficCars.push({ x: randomLane, y: -90, width: 38, height: 70, color: '#ef4444' });
+            }
+
+            for (let i = trafficCars.length - 1; i >= 0; i--) {
+                trafficCars[i].y += 5;
+
+                if (
+                    playerCar.x < trafficCars[i].x + trafficCars[i].width &&
+                    playerCar.x + playerCar.width > trafficCars[i].x &&
+                    playerCar.y < trafficCars[i].y + trafficCars[i].height &&
+                    playerCar.y + playerCar.height > trafficCars[i].y
+                ) {
+                    carGameRunning = false;
+                }
+
+                if (trafficCars[i].y > 520) {
+                    trafficCars.splice(i, 1);
+                }
+            }
+
+            drawCarGame();
+        }
+
+        function drawCarGame() {
+            carCtx.fillStyle = '#1e293b';
+            carCtx.fillRect(0, 0, carCanvas.width, carCanvas.height);
+
+            carCtx.fillStyle = '#0f172a';
+            carCtx.fillRect(40, 0, 370, carCanvas.height);
+
+            carCtx.fillStyle = '#334155';
+            carCtx.fillRect(35, 0, 6, carCanvas.height);
+            carCtx.fillRect(409, 0, 6, carCanvas.height);
+
+            carCtx.strokeStyle = '#facc15';
+            carCtx.lineWidth = 4;
+            carCtx.setLineDash([25, 25]);
+            carCtx.lineDashOffset = -roadOffset;
+            
+            carCtx.beginPath();
+            carCtx.moveTo(155, 0);
+            carCtx.lineTo(155, carCanvas.height);
+            carCtx.stroke();
+
+            carCtx.beginPath();
+            carCtx.moveTo(295, 0);
+            carCtx.lineTo(295, carCanvas.height);
+            carCtx.stroke();
+            carCtx.setLineDash([]);
+
+            for (let car of trafficCars) {
+                carCtx.fillStyle = car.color;
+                carCtx.fillRect(car.x, car.y, car.width, car.height);
+                carCtx.fillStyle = '#0f172a';
+                carCtx.fillRect(car.x + 4, car.y + 12, 30, 16);
+                carCtx.fillRect(car.x + 4, car.y + 45, 30, 12);
+            }
+
+            carCtx.fillStyle = '#6366f1';
+            carCtx.fillRect(playerCar.x, playerCar.y, playerCar.width, playerCar.height);
+            carCtx.fillStyle = '#fff';
+            carCtx.fillRect(playerCar.x + 4, playerCar.y + 12, 30, 16);
+            carCtx.fillStyle = '#38bdf8';
+            carCtx.fillRect(playerCar.x + 4, playerCar.y + 4, 8, 4);
+            carCtx.fillRect(playerCar.x + 26, playerCar.y + 4, 8, 4);
+
+            if (!carGameRunning) {
+                carCtx.fillStyle = 'rgba(7, 9, 14, 0.9)';
+                carCtx.fillRect(0, 0, carCanvas.width, carCanvas.height);
+                carCtx.fillStyle = '#f8fafc';
+                carCtx.font = 'bold 22px Inter, sans-serif';
+                carCtx.textAlign = 'center';
+                carCtx.fillText('CRASHED!', carCanvas.width / 2, 210);
+                carCtx.font = '13px Inter, sans-serif';
+                carCtx.fillStyle = '#94a3b8';
+                carCtx.fillText('Final Distance: ' + carScore + ' meters', carCanvas.width / 2, 245);
+                carCtx.fillText('Click Restart Race to Try Again', carCanvas.width / 2, 275);
+            }
+        }
+
+        /* AI Image Generator */
+        function generateAiImage() {
+            let prompt = document.getElementById('aiImagePrompt').value.trim();
+            if(prompt === "") { alert("Please enter an image prompt!"); return; }
+            
+            document.getElementById('aiImageLoading').style.display = 'block';
+            document.getElementById('aiImageResult').style.display = 'none';
+
+            let imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
+            let imgTester = new Image();
+            imgTester.onload = function() {
+                document.getElementById('aiImageLoading').style.display = 'none';
+                document.getElementById('generatedAiImg').src = imageUrl;
+                document.getElementById('downloadAiImg').href = imageUrl;
+                document.getElementById('aiImageResult').style.display = 'block';
+            };
+            imgTester.onerror = function() {
+                document.getElementById('aiImageLoading').style.display = 'none';
+                alert("Generation failed. Please try a different prompt.");
+            };
+            imgTester.src = imageUrl;
+        }
+
+        /* Direct On-Site AI Video Generator */
+        function generateAiVideoDirect() {
+            let prompt = document.getElementById('aiVideoPrompt').value.trim();
+            if(prompt === "") { alert("Please enter a video prompt!"); return; }
+
+            document.getElementById('aiVideoLoading').style.display = 'block';
+            document.getElementById('aiVideoResult').style.display = 'none';
+
+            setTimeout(() => {
+                let videoNodeUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + " cinematic motion video loop 4k")}?width=1280&height=720&nologo=true`;
+                let player = document.getElementById('generatedVideoPlayer');
+                player.src = videoNodeUrl;
+                
+                document.getElementById('aiVideoLoading').style.display = 'none';
+                document.getElementById('downloadAiVideo').href = videoNodeUrl;
+                document.getElementById('aiVideoResult').style.display = 'block';
+            }, 2500);
+        }
+
+        /* Thumbnail Studio Mode Switcher */
+        function toggleThumbMode() {
+            let mode = document.getElementById('thumbMode').value;
+            document.getElementById('thumbAiBox').style.display = (mode === 'ai') ? 'block' : 'none';
+            document.getElementById('thumbExtractBox').style.display = (mode === 'extract') ? 'block' : 'none';
+            document.getElementById('thumbCustomBox').style.display = (mode === 'custom') ? 'block' : 'none';
+            document.getElementById('thumbTextOverlayControls').style.display = (mode !== 'ai') ? 'block' : 'none';
+        }
+
+        function generateAiThumbnail() {
+            let prompt = document.getElementById('thumbPrompt').value.trim();
+            if(prompt === "") { alert("Please enter a thumbnail prompt!"); return; }
+
+            document.getElementById('thumbLoading').style.display = 'block';
+            document.getElementById('thumbResult').style.display = 'none';
+
+            let thumbUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + " youtube thumbnail high contrast vivid colors dramatic lighting")}?width=1280&height=720&nologo=true`;
+            let img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = function() {
+                let canvas = document.getElementById('thumbCanvas');
+                canvas.width = 1280;
+                canvas.height = 720;
+                let ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, 1280, 720);
+                
+                document.getElementById('thumbLoading').style.display = 'none';
+                document.getElementById('downloadThumb').href = canvas.toDataURL('image/jpeg', 0.95);
+                document.getElementById('thumbResult').style.display = 'block';
+            };
+            img.src = thumbUrl;
+        }
+
+        function extractYtThumbnail() {
+            let url = document.getElementById('ytThumbUrlInput').value.trim();
+            if(url === "") { alert("Please paste a valid YouTube video URL!"); return; }
+
+            let videoId = "";
+            if (url.includes("youtu.be/")) {
+                videoId = url.split("youtu.be/")[1]?.split("?")[0];
+            } else if (url.includes("watch?v=")) {
+                videoId = url.split("watch?v=")[1]?.split("&")[0];
+            }
+
+            if(!videoId) { alert("Invalid YouTube URL format. Could not extract video ID."); return; }
+
+            document.getElementById('thumbLoading').style.display = 'block';
+            document.getElementById('thumbResult').style.display = 'none';
+
+            let ytThumbSrc = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+            
+            let img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = function() {
+                let canvas = document.getElementById('thumbCanvas');
+                canvas.width = 1280;
+                canvas.height = 720;
+                let ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, 1280, 720);
+
+                document.getElementById('thumbLoading').style.display = 'none';
+                document.getElementById('thumbTextOverlayControls').style.display = 'block';
+                document.getElementById('downloadThumb').href = canvas.toDataURL('image/jpeg', 0.95);
+                document.getElementById('thumbResult').style.display = 'block';
+            };
+            img.onerror = function() {
+                document.getElementById('thumbLoading').style.display = 'none';
+                alert("Could not fetch HD thumbnail from this YouTube link. Try another video!");
+            };
+            img.src = ytThumbSrc;
+        }
+
+        document.getElementById('thumbBgFile').addEventListener('change', function(e) {
+            if(e.target.files.length === 0) return;
+            document.getElementById('thumbLoading').style.display = 'block';
+            let reader = new FileReader();
+            reader.onload = function(event) {
+                let img = new Image();
+                img.onload = function() {
+                    let canvas = document.getElementById('thumbCanvas');
+                    canvas.width = 1280;
+                    canvas.height = 720;
+                    let ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, 1280, 720);
+                    document.getElementById('thumbLoading').style.display = 'none';
+                    document.getElementById('thumbTextOverlayControls').style.display = 'block';
+                    document.getElementById('downloadThumb').href = canvas.toDataURL('image/jpeg', 0.95);
+                    document.getElementById('thumbResult').style.display = 'block';
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(e.target.files[0]);
+        });
+
+        function applyTextOverlayToCanvas() {
+            let text = document.getElementById('thumbText').value.trim();
+            let color = document.getElementById('thumbTextColor').value;
+            let canvas = document.getElementById('thumbCanvas');
+            let ctx = canvas.getContext('2d');
+
+            if(text !== "") {
+                ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
+                ctx.fillRect(40, 440, 1200, 220);
+                
+                ctx.font = "900 68px Inter, sans-serif";
+                ctx.fillStyle = color;
+                ctx.textAlign = "center";
+                ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+                ctx.shadowBlur = 24;
+                ctx.fillText(text.toUpperCase(), 640, 565);
+            }
+            document.getElementById('downloadThumb').href = canvas.toDataURL('image/jpeg', 0.95);
+            alert("Headline text applied successfully!");
+        }
+
+        function resizeImage() {
+            let fileInput = document.getElementById('resizeFile');
+            let w = parseInt(document.getElementById('targetWidth').value);
+            let h = parseInt(document.getElementById('targetHeight').value);
+            if(fileInput.files.length === 0) { alert("Please select an image file first!"); return; }
+            let file = fileInput.files[0];
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let img = new Image();
+                img.onload = function() {
+                    let canvas = document.getElementById('canvasProcess');
+                    let ctx = canvas.getContext('2d');
+                    canvas.width = w ? w : img.width;
+                    canvas.height = h ? h : img.height;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    let link = document.getElementById('downloadResize');
+                    link.href = canvas.toDataURL('image/jpeg', 0.9);
+                    link.download = "resized_" + file.name;
+                    document.getElementById('resizeResult').style.display = 'block';
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function compressImage() {
+            let fileInput = document.getElementById('compressFile');
+            let quality = parseFloat(document.getElementById('qualitySelect').value);
+            if(fileInput.files.length === 0) { alert("Please select an image file first!"); return; }
+            let file = fileInput.files[0];
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let img = new Image();
+                img.onload = function() {
+                    let canvas = document.getElementById('canvasProcess');
+                    let ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    let link = document.getElementById('downloadCompress');
+                    link.href = canvas.toDataURL('image/jpeg', quality);
+                    link.download = "compressed_" + file.name;
+                    document.getElementById('compressResult').style.display = 'block';
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function convertImageFormat() {
+            let fileInput = document.getElementById('convertFile');
+            let format = document.getElementById('formatSelect').value;
+            if(fileInput.files.length === 0) { alert("Please select an image file first!"); return; }
+            let file = fileInput.files[0];
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let img = new Image();
+                img.onload = function() {
+                    let canvas = document.getElementById('canvasProcess');
+                    let ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    let link = document.getElementById('downloadConvert');
+                    link.href = canvas.toDataURL(format, 0.95);
+                    let baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                    link.download = baseName + "." + format.split('/')[1];
+                    document.getElementById('convertResult').style.display = 'block';
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function processYtDownload() {
+            let url = document.getElementById('ytUrlInput').value.trim();
+            if(url === "") { alert("Please paste a valid YouTube URL!"); return; }
+            document.getElementById('ytOpenLink').href = "https://en1.savefrom.net/19wr/?url=" + encodeURIComponent(url);
+            document.getElementById('downloadResult').style.display = 'block';
+        }
+
+        function processInstaDownload() {
+            let url = document.getElementById('instaUrlInput').value.trim();
+            if(url === "") { alert("Please paste a valid Instagram URL!"); return; }
+            document.getElementById('instaOpenLink').href = "https://fastvideosave.net/?url=" + encodeURIComponent(url);
+            document.getElementById('instaResult').style.display = 'block';
+        }
+
+        function processMovieDownload() {
+            let query = document.getElementById('movieSearchInput').value.trim();
+            let targetUrl = query !== "" ? "https://new5.hdhub4u.cl/?s=" + encodeURIComponent(query) : "https://new5.hdhub4u.cl/?utm=mn1";
+            document.getElementById('movieOpenLink').href = targetUrl;
+            document.getElementById('movieResult').style.display = 'block';
+        }
+
+        function generateQR() {
+            let text = document.getElementById('qrText').value.trim();
+            if(text === "") { alert("Please enter text or URL for the QR code!"); return; }
+            let qrApi = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(text);
+            document.getElementById('qrImage').src = qrApi;
+            document.getElementById('downloadQr').setAttribute('href', qrApi);
+            document.getElementById('qrResult').style.display = 'block';
+        }
+
+        function generatePassword() {
+            let length = document.getElementById('passLength').value;
+            let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+            let password = "";
+            for (let i = 0; i < length; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('generatedPassword').value = password;
+        }
+
+        function copyPassword() {
+            let passBox = document.getElementById('generatedPassword');
+            passBox.select();
+            navigator.clipboard.writeText(passBox.value);
+            alert("Password copied to clipboard!");
+        }
+
+        function countText() {
+            let text = document.getElementById('textInput').value;
+            document.getElementById('wordCount').innerText = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
+            document.getElementById('charCount').innerText = text.length;
+        }
+
+        function formatJson() {
+            try {
+                let parsed = JSON.parse(document.getElementById('jsonInput').value);
+                document.getElementById('jsonOutput').value = JSON.stringify(parsed, null, 4);
+            } catch (e) { alert("Invalid JSON format: " + e.message); }
+        }
+
+        function minifyJson() {
+            try {
+                let parsed = JSON.parse(document.getElementById('jsonInput').value);
+                document.getElementById('jsonOutput').value = JSON.stringify(parsed);
+            } catch (e) { alert("Invalid JSON format: " + e.message); }
+        }
+
+        function encodeBase64() {
+            try { document.getElementById('base64Output').value = btoa(document.getElementById('base64Input').value); }
+            catch (e) { alert("Encoding error"); }
+        }
+
+        function decodeBase64() {
+            try { document.getElementById('base64Output').value = atob(document.getElementById('base64Input').value); }
+            catch (e) { alert("Invalid Base64 string!"); }
+        }
+
+        function encodeUrlData() {
+            document.getElementById('urlOutput').value = encodeURIComponent(document.getElementById('urlInput').value);
+        }
+
+        function decodeUrlData() {
+            document.getElementById('urlOutput').value = decodeURIComponent(document.getElementById('urlInput').value);
+        }
+
+        generatePassword();
+    </script>
+</body>
+</html>
